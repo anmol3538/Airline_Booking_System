@@ -6,6 +6,7 @@ const apiroutes = require('./routes/index')
 // const sequelize = require('sequelize');
 // const city = require('./models/city');
 const {Airport, City} = require('./models/index')
+const {Airplane} = require('./models/index')
 const setupandstartserver = async () => {
     const app = express();
     app.use(bodyparser.json());
@@ -16,13 +17,16 @@ const setupandstartserver = async () => {
         // const airports = await Airport.findAll();
         // console.log(airports);
         //db.sequelize.sync({alter : true})
-        const city = await City.findOne({
-            where: {
-                id : 13
-            }
-        })
-        const airport = await city.getAirports();
-        console.log(airport);
+        // const city = await City.findOne({
+        //     where: {
+        //         id : 13
+        //     }
+        // })
+        // const airport = await city.getAirports();
+        // console.log(airport);
+        // await Airplane.create({
+        //     modelNumber: 'Bombardier CRJ',
+        // })
     })
 } 
 
