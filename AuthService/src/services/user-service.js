@@ -1,7 +1,8 @@
 const UserRepository = require('../repository/user-repository')
 const jwt = require('jsonwebtoken')
 const {JWT_KEY} = require('../config/serverConfig')
-const bcrypt = require('bcrypt')
+const bcrypt = require('bcrypt');
+const { response } = require('express');
 
 class UserService {
     constructor() {
@@ -22,7 +23,9 @@ class UserService {
     async signin(email, password) {
             try{
                 const user = await this.userrepository.getbyemail(email);
-                const passwordmatch = this.checkpassword(password, user.password);
+                
+                const passwordmatch = await this.checkpassword(password, user.password);
+        
                 if(!passwordmatch){
                     console.log('password doesnot match');
                     throw{error: 'Incorrect Password'};
@@ -35,7 +38,23 @@ class UserService {
                 throw {error}
             }
     }
-
+    async isAuthenticated(token) {
+        try{
+            const isverify = this.verifytoken(token);
+            if(!isverify){
+                throw {error: 'invalid token'}
+            }
+            const user = this.userrepository.getbyid(response.id);
+            if(!user) {
+                throw {error: 'No user with the corresponding token exists'}
+            } 
+            return user.id;
+        }
+        catch(error){
+            console.log('something went wrong in signin');
+            throw {error}
+        }
+    }
     createtoken(user){
         try{
             const token = jwt.sign(user, JWT_KEY, { expiresIn: '1h'})
@@ -58,9 +77,9 @@ class UserService {
         }
     }
 
-    checkpassword(userinputpassword, encryptedpassword) {
+    async checkpassword(userinputpassword, encryptedpassword) {
         try{
-            return bcrypt.compareSync(userinputpassword, encryptedpassword)
+            return await bcrypt.compareSync(userinputpassword, encryptedpassword)
         }
         catch(error){
             console.log('something wrong at passwordcheck layer');
