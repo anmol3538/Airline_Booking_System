@@ -39,12 +39,12 @@ class UserService {
                 return newjwt;
             }
             catch(error){
-                console.log(error);
+                console.log(error.name);
                 if(error.name == 'AttributesNotFound'){
                     throw error;
                 }
                 console.log('something went wrong in signin');
-                throw {error}
+                throw error;
             }
     }
     async isAuthenticated(token) {
