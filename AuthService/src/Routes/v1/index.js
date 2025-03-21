@@ -6,4 +6,5 @@ router.post('/signup',
     AuthRequestValidators.validateUserAuth, Userconstroller.create);
 router.post('/signin', AuthRequestValidators.validateUserAuth, Userconstroller.signin)
 router.get('/isAuthenticated', Userconstroller.isAuthenticate);
+router.get('/isAdmin', AuthRequestValidators.validateisadminRequest,Userconstroller.isAdmin);
 module.exports = router

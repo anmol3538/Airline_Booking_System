@@ -1,5 +1,6 @@
 const Userservice = require('../services/user-service')
 const userservice = new Userservice();
+
 const create = async (req, res) => {
     try {
         const response = await userservice.create({
@@ -15,7 +16,7 @@ const create = async (req, res) => {
     }
     catch (error) {
         console.log(error);
-        return res.status(500).json({
+        return res.status(error.statuscode).json({
             data: {},
             message: 'something went wrong',
             success: false,
@@ -36,11 +37,11 @@ const signin = async (req, res) => {
     }
     catch (error){
         console.log(error);
-        return res.status(500).json({
-            message: 'Something went wrong',
+        return res.status(error.statuscode).json({
+            message: error.message,
             data: {},
             success: false,
-            err: error
+            err: error.explanation
         })
     }
 }
@@ -66,8 +67,29 @@ const isAuthenticate = async(req, res) => {
         })
     }
 }
+
+const isAdmin = async (req, res) => {
+    try {
+        const response = await userservice.isAdmin(req.body.id);
+        return res.status(200).json({
+            data: response,
+            err: {},
+            success: true,
+            message: 'User is admin'
+        })
+    } catch (error) {
+        console.log(error);
+        return res.status(error.statuscode).json({
+            message: 'Something went wrong',
+            data: {},
+            success: false,
+            err: error
+        })
+    }
+}
 module.exports = {
     create,
     signin,
-    isAuthenticate
+    isAuthenticate, 
+    isAdmin
 }

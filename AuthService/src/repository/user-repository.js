@@ -1,13 +1,18 @@
-const {usermodel} = require('../models/index')
-
+const {Usermodel, Role} = require('../models/index')
+const ValidationError = require('../utils/validation-error')
+const ClientError = require('../utils/client-error')
+const {StatusCodes} = require('http-status-codes');
 class UserRepository {
 
     async create(data) {
         try{
-            const user = await usermodel.create(data);
+            const user = await Usermodel.create(data);
             return user;
         }
         catch (error) {
+            if(error.name == 'SequelizeValidationError'){
+                throw new ValidationError(error);
+            }
             console.log("something wrong at repository layer")
             throw {error}
         }
@@ -15,7 +20,7 @@ class UserRepository {
 
     async destroy(userid){
         try{
-            usermodel.destroy({
+            Usermodel.destroy({
                 where : {
                     id : userid
                 }
@@ -30,7 +35,7 @@ class UserRepository {
 
     async getbyid(userid) {
         try{
-            const user = await usermodel.findByPk(userid, {
+            const user = await Usermodel.findByPk(userid, {
                 attributes: ['email', 'id']
             });
             return user;
@@ -43,14 +48,39 @@ class UserRepository {
 
     async getbyemail(usermail){
         try{
-            const user = await usermodel.findOne({
+            const user = await Usermodel.findOne({
                 where: {
                     email: usermail
                 }
             })
+            if(!user){
+                throw new ClientError(
+                    'AttributesNotfound',
+                    'Invalid email sent in the request',
+                    'Please check the email, as there is no record of email',
+                    StatusCodes.NOT_FOUND
+                )
+            }
             return user;
         }
         catch(error){
+            console.log(error);
+            console.log('something wrong in repository layer');
+            throw {error}
+        }
+    }
+
+    async isAdmin(userid){
+        try {
+            const user = await Usermodel.findByPk(userid);
+            const adminrole = await Role.findOne({
+                where: {
+                    name: 'ADMIN'
+                }
+            })
+            return user.hasRole(adminrole);
+        } catch (error) {
+            console.log(error);
             console.log('something wrong in repository layer');
             throw {error}
         }

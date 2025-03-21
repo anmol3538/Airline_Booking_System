@@ -15,6 +15,9 @@ class UserService {
             return user;
         }
         catch(error){
+            if(error.name == 'SequelizeValidationError'){
+                throw error;
+            }
             console.log('something wrong at service layer');
             throw {error}
         }
@@ -23,7 +26,9 @@ class UserService {
     async signin(email, password) {
             try{
                 const user = await this.userrepository.getbyemail(email);
-                
+                if(!user){
+                    throw error;
+                }
                 const passwordmatch = await this.checkpassword(password, user.password);
         
                 if(!passwordmatch){
@@ -34,6 +39,10 @@ class UserService {
                 return newjwt;
             }
             catch(error){
+                console.log(error);
+                if(error.name == 'AttributesNotFound'){
+                    throw error;
+                }
                 console.log('something went wrong in signin');
                 throw {error}
             }
@@ -82,6 +91,15 @@ class UserService {
             return await bcrypt.compareSync(userinputpassword, encryptedpassword)
         }
         catch(error){
+            console.log('something wrong at passwordcheck layer');
+            throw {error};
+        }
+    }
+
+    isAdmin(userid) {
+        try {
+            return this.userrepository.isAdmin(userid);
+        } catch (error) {
             console.log('something wrong at passwordcheck layer');
             throw {error};
         }
